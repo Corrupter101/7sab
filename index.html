@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حساب التضمين</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 16 / 9;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #f8f5f0;
+    }
+    .container {
+      width: 100%;
+      max-width: 640px;
+      padding: 20px;
+    }
+    body { font-family: 'Janat', Arial, sans-serif; }
+    h1 { text-align: center; }
+    .player { background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 10px; box-shadow: 0 0 5px #ccc; display: flex; flex-direction: column; gap: 10px; }
+    input[type="text"], input[type="number"] { padding: 10px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; }
+    .score-controls { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; }
+    .score-controls button { flex: none; width: 64px; padding: 8px; font-size: 18px; }
+    #addBtn, #resetBtn { padding: 6px 12px; margin: 10px auto; display: block; font-size: 14px; }
+    #alert, #topPlayer { text-align: center; font-weight: bold; margin-top: 20px; font-size: 18px; }
+    #topPlayer { color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h1 style="margin: 0;">حساب التضمين</h1>
+      <span onclick="alert('يتم احتساب البنوط للاعبين حسب الأيقونات:\n♥️ = 1 بنط\n♦️ = 10 بنط\n♠️ = 26 بنط\n⏬️ = -10 بنط\n➖ = -1\n➕ = +1');" style="cursor: pointer; font-size: 18px; color: red; margin-right: 8px;">❓ تعليمات</span>
+    </div>
+    <div id="topPlayer"></div>
+    <div id="players"></div>
+    <div style="display: flex; justify-content: center; gap: 0;">
+      <button id="resetBtn" style="width: 120px;">🔄 دور جديد</button>
+      <button id="shareBtn" style="width: 120px;">📢 النشرة</button>
+    </div>
+      <p style="text-align: center; font-size: 12px; color: red;">جميع الحقوق محفوظة لحزب الكهف © 2025</p>
+    </div>
+    <div id="alert"></div>
+  </div>
+
+  <script>
+    let players = JSON.parse(localStorage.getItem('players')) || [
+      { name: '', score: 0 },
+      { name: '', score: 0 },
+      { name: '', score: 0 },
+      { name: '', score: 0 }
+    ];
+
+    const maxScore = 159;
+    const playersDiv = document.getElementById('players');
+    const alertDiv = document.getElementById('alert');
+
+    function savePlayers() {
+      localStorage.setItem('players', JSON.stringify(players));
+    }
+
+    function renderPlayers() {
+      playersDiv.innerHTML = '';
+      alertDiv.textContent = '';
+      let sorted = players.slice().sort((a, b) => a.score - b.score);
+      let top = sorted[sorted.length - 1];
+      if (top.score >= 159) {
+        document.getElementById("topPlayer").textContent = `فارت في وجه ${top.name} 💣`;
+      } else {
+        document.getElementById("topPlayer").textContent = top.name ? `الأخير: ${top.name} - ${top.score} نقطة 😢` : '';
+      }
+
+      players.forEach((player, index) => {
+        const div = document.createElement('div');
+        div.className = 'player';
+        div.innerHTML = `
+          <input type="text" placeholder="اسم اللاعب" value="${player.name}" onchange="updateName(${index}, this.value)">
+          <div class="score-controls">
+            <button onclick="addScore(${index}, 1)">♥️</button>
+            <button onclick="addScore(${index}, 10)">♦️</button>
+            <button onclick="addScore(${index}, 26)">♠️</button>
+            <button onclick="subtractScore(${index}, 10)" style="color: goldenrod;">⏬️</button>
+            <button onclick="updateScore(${index}, -1)">➖</button>
+            <input type="number" min="-999" max="159" value="${player.score || 0}" onchange="updateScoreManual(${index}, this.value)" style="width: 50px;">
+            <button onclick="updateScore(${index}, 1)">➕</button>
+          </div>
+        `;
+        playersDiv.appendChild(div);
+      });
+
+      savePlayers();
+    }
+
+    function updateScore(index, delta) {
+      players[index].score += delta;
+      renderPlayers();
+    }
+
+    function updateScoreManual(index, value) {
+      players[index].score = parseInt(value) || 0;
+      renderPlayers();
+    }
+
+    function updateName(index, newName) {
+      players[index].name = newName;
+      savePlayers();
+    }
+
+    function addScore(index, value) {
+      players[index].score += value;
+      renderPlayers();
+    }
+
+    function subtractScore(index, value) {
+      players[index].score -= value;
+      renderPlayers();
+    }
+
+    function addPlayer() {
+      if (players.length < 10) {
+        players.push({ name: '', score: 0 });
+        renderPlayers();
+      }
+    }
+
+    function resetAll() {
+      players = players.map(p => ({ name: p.name, score: 0 }));
+      renderPlayers();
+    }
+
+        document.getElementById('resetBtn').onclick = resetAll;
+
+    renderPlayers();
+  
+    document.getElementById("shareBtn").onclick = function() {
+  // تحقق من إدخال جميع الأسماء
+  const emptyNames = players.some(p => !p.name.trim());
+  if (emptyNames) {
+    alert("يرجى إدخال أسماء جميع اللاعبين أولاً.");
+    return;
+  }
+      const result = players.map(p => `${p.name}: ${p.score} نقطة`).join("\n");
+      
+    if (navigator.share) {
+      // navigator.share removed
+/*
+        
+        
+      */
+
+      // نطق النتائج بالصوت
+      const utterance = new SpeechSynthesisUtterance("نتائج اللاعبين:");
+      utterance.lang = "ar-SA";
+      speechSynthesis.speak(utterance);
+      players.forEach(p => {
+        const nameUtter = new SpeechSynthesisUtterance(p.name + " لديه " + p.score + " بنط");
+        nameUtter.lang = "ar-SA";
+      
+        speechSynthesis.speak(nameUtter);
+      });
+    
+    } else {
+      
+    }
+    
+    };
+    </script>
+</body>
+</html>
