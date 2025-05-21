@@ -3,13 +3,39 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حساب التضمين</title>
   <style>
+    button {
+      font-size: 18px !important;
+      padding: 6px 12px;
+      min-width: 48px;
+      border-radius: 8px;
+      margin: 2px;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .action-buttons button {
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #f1f1f1;
+      border: 1px solid #ccc;
+    }
+    @media (max-width: 600px) {
+      button {
+        font-size: 16px !important;
+        padding: 4px 8px;
+      }
+    }
+    
     html, body {
       width: 100%;
       height: 100%;
-      aspect-ratio: 16 / 9;
+      
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -20,8 +46,8 @@
     }
     .container {
       width: 100%;
-      max-width: 640px;
-      padding: 20px;
+      max-width: 100%;
+      padding: 20px; box-sizing: border-box;
     }
     body { font-family: 'Janat', Arial, sans-serif; }
     h1 { text-align: center; }
@@ -43,6 +69,7 @@
     <div id="topPlayer"></div>
     <div id="players"></div>
     <div style="display: flex; justify-content: center; gap: 0;">
+      <button id="clearNamesBtn" style="width: 120px;">👥 لاعبين جدد</button>
       <button id="resetBtn" style="width: 120px;">🔄 دور جديد</button>
       <button id="shareBtn" style="width: 120px;">📢 النشرة</button>
     </div>
@@ -73,7 +100,7 @@
       let sorted = players.slice().sort((a, b) => a.score - b.score);
       let top = sorted[sorted.length - 1];
       if (top.score >= 159) {
-        document.getElementById("topPlayer").textContent = `فارت في وجه ${top.name} 💣`;
+        document.getElementById("topPlayer").textContent = `فارت في وجه ${top.name} 💣`; playVictory();
       } else {
         document.getElementById("topPlayer").textContent = top.name ? `الأخير: ${top.name} - ${top.score} نقطة 😢` : '';
       }
@@ -84,13 +111,13 @@
         div.innerHTML = `
           <input type="text" placeholder="اسم اللاعب" value="${player.name}" onchange="updateName(${index}, this.value)">
           <div class="score-controls">
-            <button onclick="addScore(${index}, 1)">♥️</button>
-            <button onclick="addScore(${index}, 20)">♦️</button>
-            <button onclick="addScore(${index}, 26)">♠️</button>
-            <button onclick="subtractScore(${index}, 10)" style="color: goldenrod;">⏬️</button>
-            <button onclick="updateScore(${index}, -1)">➖</button>
-            <input type="number" min="-999" max="159" value="${player.score || 0}" onchange="updateScoreManual(${index}, this.value)" style="width: 50px;">
-            <button onclick="updateScore(${index}, 1)">➕</button>
+            <button onclick="addScore(${index}, 1); playSound('sound-heart')">♥️</button>
+            <button onclick="addScore(${index}, 20); playSound('sound-diamond')">♦️</button>
+            <button onclick="addScore(${index}, 26); playSound('sound-spade')">♠️</button>
+            <button onclick="subtractScore(${index}, 10); playSound('sound-minus10')" style="color: goldenrod;">⏬️</button>
+            <button onclick="updateScore(${index}, -1); playSound('sound-minus1')">➖</button>
+            <input type="number" style="width: 70px; height: 40px;" onclick="this.select()" min="-999" max="159" value="${player.score || 0}" onchange="updateScoreManual(${index}, this.value)" style="width: 50px;">
+            <button onclick="updateScore(${index}, 1); playSound('sound-plus1')">➕</button>
           </div>
         `;
         playersDiv.appendChild(div);
@@ -159,12 +186,12 @@
       // نطق النتائج بالصوت
       const utterance = new SpeechSynthesisUtterance("نتائج اللاعبين:");
       utterance.lang = "ar-SA";
-      speechSynthesis.speak(utterance);
+      utterance.lang = "ar-SA"; speechSynthesis.speak(utterance);
       players.forEach(p => {
         const nameUtter = new SpeechSynthesisUtterance(p.name + " لديه " + p.score + " بنط");
         nameUtter.lang = "ar-SA";
       
-        speechSynthesis.speak(nameUtter);
+        nameUtter.lang = "ar-SA"; speechSynthesis.speak(nameUtter);
       });
     
     } else {
@@ -172,6 +199,36 @@
     }
     
     };
-    </script>
+    
+// صوت خاص عند الوصول إلى 159
+function playVictory() {
+  const victorySound = new Audio("https://cdn.pixabay.com/download/audio/2022/08/19/audio_dba7e97d0e.mp3?filename=success-fanfare-trumpets-6185.mp3");
+  victorySound.play();
+}
+</script>
+
+<audio id="sound-heart" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e25ed01d4.mp3?filename=click-124467.mp3"></audio>
+<audio id="sound-diamond" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_e7f40eece2.mp3?filename=interface-click-124476.mp3"></audio>
+<audio id="sound-spade" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6f52f3910e.mp3?filename=coin-124473.mp3"></audio>
+<audio id="sound-minus10" src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_2866e8a64f.mp3?filename=wrong-answer-fail-notification-95336.mp3"></audio>
+<audio id="sound-minus1" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_195da06f39.mp3?filename=error-124480.mp3"></audio>
+<audio id="sound-plus1" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d86f3e06a.mp3?filename=select-124481.mp3"></audio>
+
+<script>
+function playSound(id) {
+  const audio = document.getElementById(id);
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
+
+// صوت خاص عند الوصول إلى 159
+function playVictory() {
+  const victorySound = new Audio("https://cdn.pixabay.com/download/audio/2022/08/19/audio_dba7e97d0e.mp3?filename=success-fanfare-trumpets-6185.mp3");
+  victorySound.play();
+}
+</script>
+
 </body>
 </html>
