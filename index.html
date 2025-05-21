@@ -38,7 +38,7 @@
   <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h1 style="margin: 0;">حساب التضمين</h1>
-      <span onclick="alert('يتم احتساب البنوط للاعبين حسب الأيقونات:\n♥️ = 1 بنط\n♦️ = 10 بنط\n♠️ = 26 بنط\n⏬️ = -10 بنط\n➖ = -1\n➕ = +1');" style="cursor: pointer; font-size: 18px; color: red; margin-right: 8px;">❓ تعليمات</span>
+      <span onclick="alert('يتم احتساب البنوط للاعبين حسب الأيقونات:\n♥️ = 1 بنط\n♦️ = 20 بنط\n♠️ = 26 بنط\n⏬️ = -10 بنط\n➖ = -1\n➕ = +1');" style="cursor: pointer; font-size: 18px; color: red; margin-right: 8px;">❓ تعليمات</span>
     </div>
     <div id="topPlayer"></div>
     <div id="players"></div>
@@ -85,7 +85,7 @@
           <input type="text" placeholder="اسم اللاعب" value="${player.name}" onchange="updateName(${index}, this.value)">
           <div class="score-controls">
             <button onclick="addScore(${index}, 1)">♥️</button>
-            <button onclick="addScore(${index}, 10)">♦️</button>
+            <button onclick="addScore(${index}, 20)">♦️</button>
             <button onclick="addScore(${index}, 26)">♠️</button>
             <button onclick="subtractScore(${index}, 10)" style="color: goldenrod;">⏬️</button>
             <button onclick="updateScore(${index}, -1)">➖</button>
