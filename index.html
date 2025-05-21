@@ -164,6 +164,10 @@
     }
 
         document.getElementById('resetBtn').onclick = resetAll;
+document.getElementById('clearNamesBtn').onclick = function() {
+  players = players.map(p => ({ name: '', score: p.score }));
+  renderPlayers();
+};
 
     renderPlayers();
   
@@ -186,12 +190,12 @@
       // نطق النتائج بالصوت
       const utterance = new SpeechSynthesisUtterance("نتائج اللاعبين:");
       utterance.lang = "ar-SA";
-      utterance.lang = "ar-SA"; speechSynthesis.speak(utterance);
+      utterance.lang = "ar-SA"; utterance.lang = "ar-SA"; speechSynthesis.speak(utterance);
       players.forEach(p => {
         const nameUtter = new SpeechSynthesisUtterance(p.name + " لديه " + p.score + " بنط");
         nameUtter.lang = "ar-SA";
       
-        nameUtter.lang = "ar-SA"; speechSynthesis.speak(nameUtter);
+        nameUtter.lang = "ar-SA"; nameUtter.lang = "ar-SA"; speechSynthesis.speak(nameUtter);
       });
     
     } else {
