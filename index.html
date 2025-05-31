@@ -2,221 +2,107 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حساب التضمين</title>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
-<script>
-function resetPlayers() {
-  if (!confirm("هل أنت متأكد من رغبتك في إدخال لاعبين جدد؟ سيتم حذف كل البيانات الحالية.")) return;
-  players = [
-    { name: "", total: 0 },
-    { name: "", total: 0 },
-    { name: "", total: 0 },
-    { name: "", total: 0 }
-  ];
-  document.getElementById("name1").value = "";
-  document.getElementById("name2").value = "";
-  document.getElementById("name3").value = "";
-  document.getElementById("name4").value = "";
-  document.getElementById("rankingList").innerHTML = "";
-  document.getElementById("roundHistory").innerHTML = "";
-  document.getElementById("score1").value = 0;
-  document.getElementById("score2").value = 0;
-  document.getElementById("score3").value = 0;
-  document.getElementById("score4").value = 0;
-  document.getElementById("newGameBtn").style.display = "none";
-}
-</script>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      padding: 20px;
-      direction: rtl;
-      text-align: center;
-    }
-    h1 {
-      color: #4dabf7;
-      margin-bottom: 10px;
-    }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-      background-color: #1e1e1e;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #333;
-    }
-    input[type="text"], input[type="number"] {
-      width: 90%;
-      padding: 8px;
-      font-size: 16px;
-      text-align: center;
-      background-color: #2a2a2a;
-      color: #fff;
-      border: 1px solid #444;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    button:nth-of-type(1) { background-color: #28a745; }
-    button:nth-of-type(2) { background-color: #17a2b8; }
-    button:nth-of-type(3) { background-color: #dc3545; }
-    .ranking {
-      margin-top: 30px;
-    }
-    .history {
-      margin-top: 30px;
-      text-align: right;
-      background-color: #1e1e1e;
-      padding: 10px;
-      border-radius: 6px;
-    }
-    .history h3 {
-      color: #aaa;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .history ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .history li {
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: #0b568f; color: white; text-align: center; direction: rtl; }
+    .container { height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 10px; box-sizing: border-box; }
+    h2 { margin: 10px 0; }
+    .player { display: flex; flex-direction: column; align-items: center; background: #1976d2; padding: 10px; border-radius: 8px; width: 100%; max-width: 360px; margin-bottom: 10px; }
+    .player-top { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; }
+    .player input[type="text"] { width: 60px; font-size: 16px; text-align: center; }
+    .player .point-input { width: 80px; font-size: 16px; margin-top: 5px; text-align: center; }
+    .player button { font-size: 18px; padding: 5px 10px; margin: 0 3px; }
+    .reset-btn, .announce-btn { margin-top: 10px; background: red; color: white; padding: 10px 20px; border: none; font-size: 16px; border-radius: 6px; }
+    .announce-btn { background: green; }
+    .name-input { width: 120px; font-size: 14px; text-align: center; margin-right: 5px; }
   </style>
 </head>
 <body>
-  <h1>حساب التضمين</h1>
-
-  <table>
-    <tr>
-      <th>اسم اللاعب</th>
-      <th>النقاط</th>
-    </tr>
-    <tr>
-  <td><input type="text" id="name1" placeholder=""></td>
-  <td><input type="number" id="score1" value="0" onfocus="this.select()"></td>
-</tr>
-    <tr>
-  <td><input type="text" id="name2" placeholder=""></td>
-  <td><input type="number" id="score2" value="0" onfocus="this.select()"></td>
-</tr>
-    <tr>
-  <td><input type="text" id="name3" placeholder=""></td>
-  <td><input type="number" id="score3" value="0" onfocus="this.select()"></td>
-</tr>
-    <tr>
-  <td><input type="text" id="name4" placeholder=""></td>
-  <td><input type="number" id="score4" value="0" onfocus="this.select()"></td>
-</tr>
-  </table>
-
-  <button onclick="addRound()">➕ إضافة الجولة</button>
-  <button onclick="announceResults()">🔊 إعلان النتائج</button>
-  <button onclick="newGame()" id="newGameBtn" style="display:none;">🔁 لعبة جديدة</button>
-  <button onclick="resetPlayers()" style="background-color:#ffc107;">👥 لاعبين جدد</button>
-
-  <div class="ranking">
-    <h2>الترتيب الحالي</h2>
-    <ol id="rankingList"></ol>
-  </div>
-
-  <div class="history">
-    <h3>سجل الجولات</h3>
-    <ul id="roundHistory"></ul>
+  <div class="container">
+    <h2>قيد عام</h2>
+    <div id="players">
+      <div class="player" id="player0">
+        <div class="player-top">
+          <button onclick="applyPoints('player0', -1)">-</button>
+          <input type="text" class="score-display" value="0" readonly>
+          <button onclick="applyPoints('player0', 1)">+</button>
+          <input type="text" class="name-input" placeholder="اللاعب 1" onchange="updateName('player0', this.value)">
+        </div>
+        <input type="number" class="point-input" placeholder="أدخل النقاط">
+      </div>
+      <div class="player" id="player1">
+        <div class="player-top">
+          <button onclick="applyPoints('player1', -1)">-</button>
+          <input type="text" class="score-display" value="0" readonly>
+          <button onclick="applyPoints('player1', 1)">+</button>
+          <input type="text" class="name-input" placeholder="اللاعب 2" onchange="updateName('player1', this.value)">
+        </div>
+        <input type="number" class="point-input" placeholder="أدخل النقاط">
+      </div>
+      <div class="player" id="player2">
+        <div class="player-top">
+          <button onclick="applyPoints('player2', -1)">-</button>
+          <input type="text" class="score-display" value="0" readonly>
+          <button onclick="applyPoints('player2', 1)">+</button>
+          <input type="text" class="name-input" placeholder="اللاعب 3" onchange="updateName('player2', this.value)">
+        </div>
+        <input type="number" class="point-input" placeholder="أدخل النقاط">
+      </div>
+      <div class="player" id="player3">
+        <div class="player-top">
+          <button onclick="applyPoints('player3', -1)">-</button>
+          <input type="text" class="score-display" value="0" readonly>
+          <button onclick="applyPoints('player3', 1)">+</button>
+          <input type="text" class="name-input" placeholder="اللاعب 4" onchange="updateName('player3', this.value)">
+        </div>
+        <input type="number" class="point-input" placeholder="أدخل النقاط">
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">إعادة تعيين</button>
+    <button class="announce-btn" onclick="announceResults()">📢 نشر النتائج</button>
   </div>
 
   <script>
-    let players = [
-        { name: "", total: 0 },
-        { name: "", total: 0 },
-        { name: "", total: 0 },
-        { name: "", total: 0 }
-      ];
+    const playerData = {
+      player0: { name: '', score: 0 },
+      player1: { name: '', score: 0 },
+      player2: { name: '', score: 0 },
+      player3: { name: '', score: 0 },
+    };
 
-    function addRound() {
-      const roundDetails = [];
-      players[0].name = document.getElementById("name1").value;
-      players[1].name = document.getElementById("name2").value;
-      players[2].name = document.getElementById("name3").value;
-      players[3].name = document.getElementById("name4").value;
+    function applyPoints(id, sign) {
+      const playerEl = document.getElementById(id);
+      const inputEl = playerEl.querySelector(".point-input");
+      const displayEl = playerEl.querySelector(".score-display");
+      const value = parseInt(inputEl.value) || 0;
+      playerData[id].score += sign * value;
+      displayEl.value = playerData[id].score;
+      inputEl.value = "";
+    }
 
-      players[0].total += parseInt(document.getElementById("score1").value) || 0;
-      players[1].total += parseInt(document.getElementById("score2").value) || 0;
-      players[2].total += parseInt(document.getElementById("score3").value) || 0;
-      players[3].total += parseInt(document.getElementById("score4").value) || 0;
+    function updateName(id, name) {
+      playerData[id].name = name;
+    }
 
-      players.sort((a, b) => a.total - b.total);
-
-      const rankingList = document.getElementById("rankingList");
-      rankingList.innerHTML = "";
-      let someoneLost = false;
-
-      players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = `${player.name}: ${player.total}`;
-        rankingList.appendChild(li);
-        roundDetails.push(`${player.name}: ${player.total}`);
-
-        if (player.total >= 159) {
-          const lossMessage = `${player.name} خسر اللعبة بعدد ${player.total} نقطة`;
-          responsiveVoice.speak(lossMessage, "Arabic Male");
-          someoneLost = true;
-        }
-      });
-
-      if (someoneLost) {
-        document.getElementById("newGameBtn").style.display = "inline-block";
+    function resetAll() {
+      for (const id in playerData) {
+        playerData[id].score = 0;
+        const playerEl = document.getElementById(id);
+        const displayEl = playerEl.querySelector(".score-display");
+        displayEl.value = 0;
       }
-
-      document.getElementById("score1").value = 0;
-      document.getElementById("score2").value = 0;
-      document.getElementById("score3").value = 0;
-      document.getElementById("score4").value = 0;
-
-      const historyList = document.getElementById("roundHistory");
-      const roundItem = document.createElement("li");
-      roundItem.textContent = `جولة ${historyList.children.length + 1}: ` + roundDetails.join(" - ");
-      historyList.appendChild(roundItem);
     }
 
     function announceResults() {
-      let speechText = "";
-      players.forEach((player) => {
-        speechText += `${player.name} ${player.total} `;
+      const results = Object.entries(playerData).map(([id, data]) => {
+        const name = data.name.trim() || id;
+        return `${name} لديه ${data.score} بنط`;
       });
-      responsiveVoice.speak(speechText, "Arabic Male");
-    }
-
-    function newGame() {
-      players = [
-        { name: "", total: 0 },
-        { name: "", total: 0 },
-        { name: "", total: 0 },
-        { name: "", total: 0 }
-      ];
-      document.getElementById("name1").value = "";
-      document.getElementById("name2").value = "";
-      document.getElementById("name3").value = "";
-      document.getElementById("name4").value = "";
-      document.getElementById("rankingList").innerHTML = "";
-      document.getElementById("roundHistory").innerHTML = "";
-      document.getElementById("newGameBtn").style.display = "none";
+      const message = results.join("، ");
+      responsiveVoice.speak(message, "Arabic Male");
     }
   </script>
-<p style="margin-top:40px; color:#888; font-size:14px;">جميع الحقوق محفوظة لحزب الكهف 2025</p>
+</body>
 </html>
