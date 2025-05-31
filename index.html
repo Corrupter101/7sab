@@ -1,236 +1,317 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حساب التضمين</title>
+  <title>حاسبة بنت السبيته</title>
   <style>
-    button {
-      font-size: 18px !important;
-      padding: 6px 12px;
-      min-width: 48px;
-      border-radius: 8px;
-      margin: 2px;
+    body {
+      font-family: 'Arial';
+      direction: rtl;
+      background-color: #f0f0f0;
+      color: #000;
+      text-align: center;
+      padding: 20px;
     }
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .action-buttons button {
-      font-size: 16px;
-      font-weight: bold;
-      background-color: #f1f1f1;
+    .player {
+      background: #fff;
+      margin: 10px auto;
+      padding: 15px;
+      border-radius: 12px;
       border: 1px solid #ccc;
+      width: 280px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    @media (max-width: 600px) {
-      button {
-        font-size: 16px !important;
-        padding: 4px 8px;
-      }
+    .player input {
+      font-size: 18px;
+      padding: 5px;
+      width: 140px;
+      text-align: center;
+      margin-bottom: 8px;
     }
-    
-    html, body {
-      width: 100%;
-      height: 100%;
-      
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      background: #f8f5f0;
+    .score {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
     }
-    .container {
-      width: 100%;
-      max-width: 100%;
-      padding: 20px; box-sizing: border-box;
+    .controls button,
+    .quick-buttons button {
+      font-size: 14px;
+      padding: 6px 10px;
+      margin: 4px 3px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
-    body { font-family: 'Janat', Arial, sans-serif; }
-    h1 { text-align: center; }
-    .player { background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 10px; box-shadow: 0 0 5px #ccc; display: flex; flex-direction: column; gap: 10px; }
-    input[type="text"], input[type="number"] { padding: 10px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; }
-    .score-controls { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; }
-    .score-controls button { flex: none; width: 64px; padding: 8px; font-size: 18px; }
-    #addBtn, #resetBtn { padding: 6px 12px; margin: 10px auto; display: block; font-size: 14px; }
-    #alert, #topPlayer { text-align: center; font-weight: bold; margin-top: 20px; font-size: 18px; }
-    #topPlayer { color: red; }
+    .quick-buttons {
+      margin-top: 10px;
+    }
+    #dark-mode-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+    }
   </style>
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9">
+function speakScore(index) {
+  const name = document.querySelector(`#score-${index}`).closest('.player').querySelector('input').value;
+  const score = scores[index];
+  const message = `${name} لديه ${score}`;
+  responsiveVoice.speak(message, "Arabic Male");
+}
+
+function speakAllScores() {
+  let delay = 0;
+  for (let i = 0; i < scores.length; i++) {
+    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
+    const score = scores[i];
+    const message = `${name} لديه ${score}`;
+    setTimeout(() => responsiveVoice.speak(message, "Arabic Male"), delay);
+    delay += 3000; // delay between each voice to avoid overlap
+  }
+}
+
+
+function speakAllScores() {
+  const messages = [];
+  for (let i = 0; i < scores.length; i++) {
+    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
+    const score = scores[i];
+    messages.push(`${name} لديه ${score}`);
+  }
+  speakMessagesSequentially(messages);
+}
+
+function speakMessagesSequentially(messages) {
+  if (messages.length === 0) return;
+  const message = messages.shift();
+  responsiveVoice.speak(message, "Arabic Male", {
+    onend: function () {
+      speakMessagesSequentially(messages);
+    }
+  });
+}
+
+
+function updateScoreDisplay(index) {
+  document.getElementById("score-" + index).textContent = scores[index];
+  highlightPlayers();
+  checkGameOver();
+}
+
+function highlightPlayers() {
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  for (let i = 0; i < scores.length; i++) {
+    const playerDiv = document.getElementById("score-" + i).closest(".player");
+    playerDiv.style.backgroundColor = "white"; // reset
+    if (scores[i] === max) {
+      playerDiv.style.backgroundColor = "#f8d7da"; // loser red
+    } else if (scores[i] === min) {
+      playerDiv.style.backgroundColor = "#d4edda"; // winner green
+    }
+  }
+}
+
+
+function checkGameOver() {
+  for (let i = 0; i < scores.length; i++) {
+    if (scores[i] >= 159) {
+      if (!document.getElementById("end-message").style.display) {
+        document.getElementById("end-message").style.display = "block";
+        document.getElementById("restart-section").style.display = "block";
+        disableAllInputs();
+      }
+      break;
+    }
+  }
+}
+
+  }
+}
+
+
+function disableAllInputs() {
+  document.querySelectorAll("button").forEach(btn => {
+    const isRestart = btn.id === "restart-button";
+    const isDarkToggle = btn.id.includes("dark-mode-toggle");
+    if (!isRestart && !isDarkToggle) {
+      btn.disabled = true;
+      btn.style.opacity = 0.5;
+      btn.style.cursor = "not-allowed";
+    }
+  });
+}
+
+  });
+}
+
+</script>
 </head>
 <body>
-  <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h1 style="margin: 0;">حساب التضمين</h1>
-      <span onclick="alert('يتم احتساب البنوط للاعبين حسب الأيقونات:\n♥️ = 1 بنط\n♦️ = 20 بنط\n♠️ = 26 بنط\n⏬️ = -10 بنط\n➖ = -1\n➕ = +1');" style="cursor: pointer; font-size: 18px; color: red; margin-right: 8px;">❓ تعليمات</span>
-    </div>
-    <div id="topPlayer"></div>
-    <div id="players"></div>
-    <div style="display: flex; justify-content: center; gap: 0;">
-      <button id="clearNamesBtn" style="width: 120px;">👥 لاعبين جدد</button>
-      <button id="resetBtn" style="width: 120px;">🔄 دور جديد</button>
-      <button id="shareBtn" style="width: 120px;">📢 النشرة</button>
-    </div>
-      <p style="text-align: center; font-size: 12px; color: red;">جميع الحقوق محفوظة لحزب الكهف © 2025</p>
-    </div>
-    <div id="alert"></div>
-  </div>
 
-  <script>
-    let players = JSON.parse(localStorage.getItem('players')) || [
-      { name: '', score: 0 },
-      { name: '', score: 0 },
-      { name: '', score: 0 },
-      { name: '', score: 0 }
-    ];
+<img src="عنوان_لصفحة_حاسبة_السبيت.png" alt="عنوان" style="max-width: 180px; display: block; margin: 0 auto 10px;" />
 
-    const maxScore = 159;
-    const playersDiv = document.getElementById('players');
-    const alertDiv = document.getElementById('alert');
-
-    function savePlayers() {
-      localStorage.setItem('players', JSON.stringify(players));
-    }
-
-    function renderPlayers() {
-      playersDiv.innerHTML = '';
-      alertDiv.textContent = '';
-      let sorted = players.slice().sort((a, b) => a.score - b.score);
-      let top = sorted[sorted.length - 1];
-      if (top.score >= 159) {
-        document.getElementById("topPlayer").textContent = `فارت في وجه ${top.name} 💣`; playVictory();
-      } else {
-        document.getElementById("topPlayer").textContent = top.name ? `الأخير: ${top.name} - ${top.score} نقطة 😢` : '';
-      }
-
-      players.forEach((player, index) => {
-        const div = document.createElement('div');
-        div.className = 'player';
-        div.innerHTML = `
-          <input type="text" placeholder="اسم اللاعب" value="${player.name}" onchange="updateName(${index}, this.value)">
-          <div class="score-controls">
-            <button onclick="addScore(${index}, 1); playSound('sound-heart')">♥️</button>
-            <button onclick="addScore(${index}, 20); playSound('sound-diamond')">♦️</button>
-            <button onclick="addScore(${index}, 26); playSound('sound-spade')">♠️</button>
-            <button onclick="subtractScore(${index}, 10); playSound('sound-minus10')" style="color: goldenrod;">⏬️</button>
-            <button onclick="updateScore(${index}, -1); playSound('sound-minus1')">➖</button>
-            <input type="number" style="width: 70px; height: 40px;" onclick="this.select()" min="-999" max="159" value="${player.score || 0}" onchange="updateScoreManual(${index}, this.value)" style="width: 50px;">
-            <button onclick="updateScore(${index}, 1); playSound('sound-plus1')">➕</button>
-          </div>
-        `;
-        playersDiv.appendChild(div);
-      });
-
-      savePlayers();
-    }
-
-    function updateScore(index, delta) {
-      players[index].score += delta;
-      renderPlayers();
-    }
-
-    function updateScoreManual(index, value) {
-      players[index].score = parseInt(value) || 0;
-      renderPlayers();
-    }
-
-    function updateName(index, newName) {
-      players[index].name = newName;
-      savePlayers();
-    }
-
-    function addScore(index, value) {
-      players[index].score += value;
-      renderPlayers();
-    }
-
-    function subtractScore(index, value) {
-      players[index].score -= value;
-      renderPlayers();
-    }
-
-    function addPlayer() {
-      if (players.length < 10) {
-        players.push({ name: '', score: 0 });
-        renderPlayers();
-      }
-    }
-
-    function resetAll() {
-      players = players.map(p => ({ name: p.name, score: 0 }));
-      renderPlayers();
-    }
-
-        document.getElementById('resetBtn').onclick = resetAll;
-document.getElementById('clearNamesBtn').onclick = function() {
-  players = players.map(p => ({ name: '', score: p.score }));
-  renderPlayers();
-};
-
-    renderPlayers();
+<div class="player">
+  <input type="text" value="سالم" readonly />
+  <div class="score"><span id="score-0">0</span></div>
   
-    document.getElementById("shareBtn").onclick = function() {
-  // تحقق من إدخال جميع الأسماء
-  const emptyNames = players.some(p => !p.name.trim());
-  if (emptyNames) {
-    alert("يرجى إدخال أسماء جميع اللاعبين أولاً.");
-    return;
-  }
-      const result = players.map(p => `${p.name}: ${p.score} نقطة`).join("\n");
-      
-    if (navigator.share) {
-      // navigator.share removed
-/*
-        
-        
-      */
+  <div class="quick-buttons">
+    <button onclick="adjustScore(0, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
+    <button onclick="adjustScore(0, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
+    <button onclick="adjustScore(0, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
+    <button onclick="adjustScore(0, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  </div>
+<button onclick="undoScore(0)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
+</div>
 
-      // نطق النتائج بالصوت
-      const utterance = new SpeechSynthesisUtterance("نتائج اللاعبين:");
-      utterance.lang = "ar-SA";
-      utterance.lang = "ar-SA"; utterance.lang = "ar-SA"; speechSynthesis.speak(utterance);
-      players.forEach(p => {
-        const nameUtter = new SpeechSynthesisUtterance(p.name + " لديه " + p.score + " بنط");
-        nameUtter.lang = "ar-SA";
-      
-        nameUtter.lang = "ar-SA"; nameUtter.lang = "ar-SA"; speechSynthesis.speak(nameUtter);
-      });
-    
-    } else {
-      
-    }
-    
-    };
-    
-// صوت خاص عند الوصول إلى 159
-function playVictory() {
-  const victorySound = new Audio("https://cdn.pixabay.com/download/audio/2022/08/19/audio_dba7e97d0e.mp3?filename=success-fanfare-trumpets-6185.mp3");
-  victorySound.play();
-}
-</script>
+<div class="player">
+  <input type="text" value="فهد" readonly />
+  <div class="score"><span id="score-1">0</span></div>
+  
+  <div class="quick-buttons">
+    <button onclick="adjustScore(1, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
+    <button onclick="adjustScore(1, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
+    <button onclick="adjustScore(1, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
+    <button onclick="adjustScore(1, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  </div>
+<button onclick="undoScore(1)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
+</div>
 
-<audio id="sound-heart" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e25ed01d4.mp3?filename=click-124467.mp3"></audio>
-<audio id="sound-diamond" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_e7f40eece2.mp3?filename=interface-click-124476.mp3"></audio>
-<audio id="sound-spade" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6f52f3910e.mp3?filename=coin-124473.mp3"></audio>
-<audio id="sound-minus10" src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_2866e8a64f.mp3?filename=wrong-answer-fail-notification-95336.mp3"></audio>
-<audio id="sound-minus1" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_195da06f39.mp3?filename=error-124480.mp3"></audio>
-<audio id="sound-plus1" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d86f3e06a.mp3?filename=select-124481.mp3"></audio>
+<div class="player">
+  <input type="text" value="ناصر" readonly />
+  <div class="score"><span id="score-2">0</span></div>
+  
+  <div class="quick-buttons">
+    <button onclick="adjustScore(2, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
+    <button onclick="adjustScore(2, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
+    <button onclick="adjustScore(2, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
+    <button onclick="adjustScore(2, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  </div>
+<button onclick="undoScore(2)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
+</div>
+
+<div class="player">
+  <input type="text" value="أحمد" readonly />
+  <div class="score"><span id="score-3">0</span></div>
+  
+  <div class="quick-buttons">
+    <button onclick="adjustScore(3, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
+    <button onclick="adjustScore(3, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
+    <button onclick="adjustScore(3, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
+    <button onclick="adjustScore(3, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  </div>
+<button onclick="undoScore(3)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
+</div>
+
+
+<div style="margin-top: 20px;">
+  <button onclick="speakAllScores()" style="background:#0d6efd;color:white;border:none;padding:8px 20px;border-radius:8px;font-size:16px;">
+    🔊 نشر النتائج
+  </button>
+</div>
+
+
+<div id="end-message" style="display:none; margin-top: 20px; font-size: 18px; color: red; font-weight: bold;">
+  ❗ انتهت اللعبة!
+</div>
+<div id="restart-section" style="display:none; margin-top: 10px;">
+  <button id="restart-button" onclick="location.reload()" style="background:#198754;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:16px;">🔁 ابدأ جولة جديدة</button>
+</div>
+
+<footer>جميع الحقوق محفوظة لحزب الكهف © 2025</footer>
 
 <script>
-function playSound(id) {
-  const audio = document.getElementById(id);
-  if (audio) {
-    audio.currentTime = 0;
-    audio.play();
+let scores = [0, 0, 0, 0];
+let history = [[], [], [], []];
+
+function adjustScore(index, delta) {
+  history[index].push(scores[index]);
+  scores[index] += delta;
+  updateScoreDisplay(index);
+}
+
+function undoScore(index) {
+  if (history[index].length > 0) {
+    scores[index] = history[index].pop();
+    updateScoreDisplay(index);
   }
 }
 
-// صوت خاص عند الوصول إلى 159
-function playVictory() {
-  const victorySound = new Audio("https://cdn.pixabay.com/download/audio/2022/08/19/audio_dba7e97d0e.mp3?filename=success-fanfare-trumpets-6185.mp3");
-  victorySound.play();
+function updateScoreDisplay(index) {
+  document.getElementById("score-" + index).textContent = scores[index];
+  highlightPlayers();
+  checkGameOver();
+}
+
+function highlightPlayers() {
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  for (let i = 0; i < scores.length; i++) {
+    const playerDiv = document.getElementById("score-" + i).closest(".player");
+    playerDiv.style.backgroundColor = "white";
+    if (scores[i] === max) {
+      playerDiv.style.backgroundColor = "#f8d7da";
+    } else if (scores[i] === min) {
+      playerDiv.style.backgroundColor = "#d4edda";
+    }
+  }
+}
+
+function checkGameOver() {
+  for (let i = 0; i < scores.length; i++) {
+    if (scores[i] >= 159) {
+      if (document.getElementById("end-message").style.display !== "block") {
+        document.getElementById("end-message").style.display = "block";
+        document.getElementById("restart-section").style.display = "block";
+        disableAllInputs();
+      }
+      break;
+    }
+  }
+}
+
+function disableAllInputs() {
+  document.querySelectorAll("button").forEach(btn => {
+    const isRestart = btn.id === "restart-button";
+    const isDarkToggle = btn.id.includes("dark-mode-toggle");
+    if (!isRestart && !isDarkToggle) {
+      btn.disabled = true;
+      btn.style.opacity = 0.5;
+      btn.style.cursor = "not-allowed";
+    }
+  });
+}
+
+function speakAllScores() {
+  const messages = [];
+  for (let i = 0; i < scores.length; i++) {
+    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
+    const score = scores[i];
+    messages.push(`${name} لديه ${score}`);
+  }
+  speakMessagesSequentially(messages);
+}
+
+function speakMessagesSequentially(messages) {
+  if (messages.length === 0) return;
+  const message = messages.shift();
+  responsiveVoice.speak(message, "Arabic Male", {
+    onend: function () {
+      speakMessagesSequentially(messages);
+    }
+  });
 }
 </script>
 
