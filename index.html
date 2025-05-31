@@ -1,319 +1,222 @@
-
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>حاسبة بنت السبيته</title>
+  <title>حساب التضمين</title>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
+<script>
+function resetPlayers() {
+  if (!confirm("هل أنت متأكد من رغبتك في إدخال لاعبين جدد؟ سيتم حذف كل البيانات الحالية.")) return;
+  players = [
+    { name: "", total: 0 },
+    { name: "", total: 0 },
+    { name: "", total: 0 },
+    { name: "", total: 0 }
+  ];
+  document.getElementById("name1").value = "";
+  document.getElementById("name2").value = "";
+  document.getElementById("name3").value = "";
+  document.getElementById("name4").value = "";
+  document.getElementById("rankingList").innerHTML = "";
+  document.getElementById("roundHistory").innerHTML = "";
+  document.getElementById("score1").value = 0;
+  document.getElementById("score2").value = 0;
+  document.getElementById("score3").value = 0;
+  document.getElementById("score4").value = 0;
+  document.getElementById("newGameBtn").style.display = "none";
+}
+</script>
   <style>
     body {
-      font-family: 'Arial';
-      direction: rtl;
-      background-color: #f0f0f0;
-      color: #000;
-      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
       padding: 20px;
-    }
-    .player {
-      background: #fff;
-      margin: 10px auto;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      width: 280px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .player input {
-      font-size: 18px;
-      padding: 5px;
-      width: 140px;
+      direction: rtl;
       text-align: center;
-      margin-bottom: 8px;
     }
-    .score {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 10px 0;
+    h1 {
+      color: #4dabf7;
+      margin-bottom: 10px;
     }
-    .controls button,
-    .quick-buttons button {
-      font-size: 14px;
-      padding: 6px 10px;
-      margin: 4px 3px;
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background-color: #1e1e1e;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #333;
+    }
+    input[type="text"], input[type="number"] {
+      width: 90%;
+      padding: 8px;
+      font-size: 16px;
+      text-align: center;
+      background-color: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 16px;
+      cursor: pointer;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
-    }
-    .quick-buttons {
-      margin-top: 10px;
-    }
-    #dark-mode-toggle {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #333;
       color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
     }
-    footer {
+    button:hover {
+      opacity: 0.9;
+    }
+    button:nth-of-type(1) { background-color: #28a745; }
+    button:nth-of-type(2) { background-color: #17a2b8; }
+    button:nth-of-type(3) { background-color: #dc3545; }
+    .ranking {
       margin-top: 30px;
+    }
+    .history {
+      margin-top: 30px;
+      text-align: right;
+      background-color: #1e1e1e;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .history h3 {
+      color: #aaa;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .history ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .history li {
+      margin-bottom: 5px;
       font-size: 14px;
-      color: #666;
     }
   </style>
-<script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9">
-function speakScore(index) {
-  const name = document.querySelector(`#score-${index}`).closest('.player').querySelector('input').value;
-  const score = scores[index];
-  const message = `${name} لديه ${score}`;
-  responsiveVoice.speak(message, "Arabic Male");
-}
-
-function speakAllScores() {
-  let delay = 0;
-  for (let i = 0; i < scores.length; i++) {
-    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
-    const score = scores[i];
-    const message = `${name} لديه ${score}`;
-    setTimeout(() => responsiveVoice.speak(message, "Arabic Male"), delay);
-    delay += 3000; // delay between each voice to avoid overlap
-  }
-}
-
-
-function speakAllScores() {
-  const messages = [];
-  for (let i = 0; i < scores.length; i++) {
-    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
-    const score = scores[i];
-    messages.push(`${name} لديه ${score}`);
-  }
-  speakMessagesSequentially(messages);
-}
-
-function speakMessagesSequentially(messages) {
-  if (messages.length === 0) return;
-  const message = messages.shift();
-  responsiveVoice.speak(message, "Arabic Male", {
-    onend: function () {
-      speakMessagesSequentially(messages);
-    }
-  });
-}
-
-
-function updateScoreDisplay(index) {
-  document.getElementById("score-" + index).textContent = scores[index];
-  highlightPlayers();
-  checkGameOver();
-}
-
-function highlightPlayers() {
-  const max = Math.max(...scores);
-  const min = Math.min(...scores);
-  for (let i = 0; i < scores.length; i++) {
-    const playerDiv = document.getElementById("score-" + i).closest(".player");
-    playerDiv.style.backgroundColor = "white"; // reset
-    if (scores[i] === max) {
-      playerDiv.style.backgroundColor = "#f8d7da"; // loser red
-    } else if (scores[i] === min) {
-      playerDiv.style.backgroundColor = "#d4edda"; // winner green
-    }
-  }
-}
-
-
-function checkGameOver() {
-  for (let i = 0; i < scores.length; i++) {
-    if (scores[i] >= 159) {
-      if (!document.getElementById("end-message").style.display) {
-        document.getElementById("end-message").style.display = "block";
-        document.getElementById("restart-section").style.display = "block";
-        disableAllInputs();
-      }
-      break;
-    }
-  }
-}
-
-  }
-}
-
-
-function disableAllInputs() {
-  document.querySelectorAll("button").forEach(btn => {
-    const isRestart = btn.id === "restart-button";
-    const isDarkToggle = btn.id.includes("dark-mode-toggle");
-    if (!isRestart && !isDarkToggle) {
-      btn.disabled = true;
-      btn.style.opacity = 0.5;
-      btn.style.cursor = "not-allowed";
-    }
-  });
-}
-
-  });
-}
-
-</script>
 </head>
 <body>
+  <h1>حساب التضمين</h1>
 
-<img src="عنوان_لصفحة_حاسبة_السبيت.png" alt="عنوان" style="max-width: 180px; display: block; margin: 0 auto 10px;" />
+  <table>
+    <tr>
+      <th>اسم اللاعب</th>
+      <th>النقاط</th>
+    </tr>
+    <tr>
+  <td><input type="text" id="name1" placeholder=""></td>
+  <td><input type="number" id="score1" value="0" onfocus="this.select()"></td>
+</tr>
+    <tr>
+  <td><input type="text" id="name2" placeholder=""></td>
+  <td><input type="number" id="score2" value="0" onfocus="this.select()"></td>
+</tr>
+    <tr>
+  <td><input type="text" id="name3" placeholder=""></td>
+  <td><input type="number" id="score3" value="0" onfocus="this.select()"></td>
+</tr>
+    <tr>
+  <td><input type="text" id="name4" placeholder=""></td>
+  <td><input type="number" id="score4" value="0" onfocus="this.select()"></td>
+</tr>
+  </table>
 
-<div class="player">
-  <input type="text" value="سالم" readonly />
-  <div class="score"><span id="score-0">0</span></div>
-  
-  <div class="quick-buttons">
-    <button onclick="adjustScore(0, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
-    <button onclick="adjustScore(0, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
-    <button onclick="adjustScore(0, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
-    <button onclick="adjustScore(0, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  <button onclick="addRound()">➕ إضافة الجولة</button>
+  <button onclick="announceResults()">🔊 إعلان النتائج</button>
+  <button onclick="newGame()" id="newGameBtn" style="display:none;">🔁 لعبة جديدة</button>
+  <button onclick="resetPlayers()" style="background-color:#ffc107;">👥 لاعبين جدد</button>
+
+  <div class="ranking">
+    <h2>الترتيب الحالي</h2>
+    <ol id="rankingList"></ol>
   </div>
-<button onclick="undoScore(0)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
-</div>
 
-<div class="player">
-  <input type="text" value="فهد" readonly />
-  <div class="score"><span id="score-1">0</span></div>
-  
-  <div class="quick-buttons">
-    <button onclick="adjustScore(1, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
-    <button onclick="adjustScore(1, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
-    <button onclick="adjustScore(1, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
-    <button onclick="adjustScore(1, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
+  <div class="history">
+    <h3>سجل الجولات</h3>
+    <ul id="roundHistory"></ul>
   </div>
-<button onclick="undoScore(1)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
-</div>
 
-<div class="player">
-  <input type="text" value="ناصر" readonly />
-  <div class="score"><span id="score-2">0</span></div>
-  
-  <div class="quick-buttons">
-    <button onclick="adjustScore(2, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
-    <button onclick="adjustScore(2, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
-    <button onclick="adjustScore(2, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
-    <button onclick="adjustScore(2, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
-  </div>
-<button onclick="undoScore(2)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
-</div>
+  <script>
+    let players = [
+        { name: "", total: 0 },
+        { name: "", total: 0 },
+        { name: "", total: 0 },
+        { name: "", total: 0 }
+      ];
 
-<div class="player">
-  <input type="text" value="أحمد" readonly />
-  <div class="score"><span id="score-3">0</span></div>
-  
-  <div class="quick-buttons">
-    <button onclick="adjustScore(3, 26)" style="background:#6f42c1; color:white;">🖤 بنت +26</button>
-    <button onclick="adjustScore(3, 20)" style="background:#ffc107; color:black;">🔟 عشرة +20</button>
-    <button onclick="adjustScore(3, 1)" style="background:#e83e8c; color:white;">♥ بنط +1</button>
-    <button onclick="adjustScore(3, -10)" style="background:#6c757d; color:white;">📉 مينس -10</button>
-  </div>
-<button onclick="undoScore(3)" style="margin-top:6px;background:#198754;color:white;border:none;padding:4px 10px;border-radius:5px;">↩ تراجع</button>
-</div>
+    function addRound() {
+      const roundDetails = [];
+      players[0].name = document.getElementById("name1").value;
+      players[1].name = document.getElementById("name2").value;
+      players[2].name = document.getElementById("name3").value;
+      players[3].name = document.getElementById("name4").value;
 
+      players[0].total += parseInt(document.getElementById("score1").value) || 0;
+      players[1].total += parseInt(document.getElementById("score2").value) || 0;
+      players[2].total += parseInt(document.getElementById("score3").value) || 0;
+      players[3].total += parseInt(document.getElementById("score4").value) || 0;
 
-<div style="margin-top: 20px;">
-  <button onclick="speakAllScores()" style="background:#0d6efd;color:white;border:none;padding:8px 20px;border-radius:8px;font-size:16px;">
-    🔊 نشر النتائج
-  </button>
-</div>
+      players.sort((a, b) => a.total - b.total);
 
+      const rankingList = document.getElementById("rankingList");
+      rankingList.innerHTML = "";
+      let someoneLost = false;
 
-<div id="end-message" style="display:none; margin-top: 20px; font-size: 18px; color: red; font-weight: bold;">
-  ❗ انتهت اللعبة!
-</div>
-<div id="restart-section" style="display:none; margin-top: 10px;">
-  <button id="restart-button" onclick="location.reload()" style="background:#198754;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:16px;">🔁 ابدأ دور جديد</button>
-</div>
+      players.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = `${player.name}: ${player.total}`;
+        rankingList.appendChild(li);
+        roundDetails.push(`${player.name}: ${player.total}`);
 
-<footer>جميع الحقوق محفوظة لحزب الكهف © 2025</footer>
+        if (player.total >= 159) {
+          const lossMessage = `${player.name} خسر اللعبة بعدد ${player.total} نقطة`;
+          responsiveVoice.speak(lossMessage, "Arabic Male");
+          someoneLost = true;
+        }
+      });
 
-<script>
-let scores = [0, 0, 0, 0];
-let history = [[], [], [], []];
-
-function adjustScore(index, delta) {
-  history[index].push(scores[index]);
-  scores[index] += delta;
-  updateScoreDisplay(index);
-}
-
-function undoScore(index) {
-  if (history[index].length > 0) {
-    scores[index] = history[index].pop();
-    updateScoreDisplay(index);
-  }
-}
-
-function updateScoreDisplay(index) {
-  document.getElementById("score-" + index).textContent = scores[index];
-  highlightPlayers();
-  checkGameOver();
-}
-
-function highlightPlayers() {
-  const max = Math.max(...scores);
-  const min = Math.min(...scores);
-  for (let i = 0; i < scores.length; i++) {
-    const playerDiv = document.getElementById("score-" + i).closest(".player");
-    playerDiv.style.backgroundColor = "white";
-    if (scores[i] === max) {
-      playerDiv.style.backgroundColor = "#f8d7da";
-    } else if (scores[i] === min) {
-      playerDiv.style.backgroundColor = "#d4edda";
-    }
-  }
-}
-
-function checkGameOver() {
-  for (let i = 0; i < scores.length; i++) {
-    if (scores[i] >= 159) {
-      if (document.getElementById("end-message").style.display !== "block") {
-        document.getElementById("end-message").style.display = "block";
-        document.getElementById("restart-section").style.display = "block";
-        disableAllInputs();
+      if (someoneLost) {
+        document.getElementById("newGameBtn").style.display = "inline-block";
       }
-      break;
+
+      document.getElementById("score1").value = 0;
+      document.getElementById("score2").value = 0;
+      document.getElementById("score3").value = 0;
+      document.getElementById("score4").value = 0;
+
+      const historyList = document.getElementById("roundHistory");
+      const roundItem = document.createElement("li");
+      roundItem.textContent = `جولة ${historyList.children.length + 1}: ` + roundDetails.join(" - ");
+      historyList.appendChild(roundItem);
     }
-  }
-}
 
-function disableAllInputs() {
-  document.querySelectorAll("button").forEach(btn => {
-    const isRestart = btn.id === "restart-button";
-    const isDarkToggle = btn.id.includes("dark-mode-toggle");
-    if (!isRestart && !isDarkToggle) {
-      btn.disabled = true;
-      btn.style.opacity = 0.5;
-      btn.style.cursor = "not-allowed";
+    function announceResults() {
+      let speechText = "";
+      players.forEach((player) => {
+        speechText += `${player.name} ${player.total} `;
+      });
+      responsiveVoice.speak(speechText, "Arabic Male");
     }
-  });
-}
 
-function speakAllScores() {
-  const messages = [];
-  for (let i = 0; i < scores.length; i++) {
-    const name = document.querySelector(`#score-${i}`).closest('.player').querySelector('input').value;
-    const score = scores[i];
-    messages.push(`${name} لديه ${score}`);
-  }
-  speakMessagesSequentially(messages);
-}
-
-function speakMessagesSequentially(messages) {
-  if (messages.length === 0) return;
-  const message = messages.shift();
-  responsiveVoice.speak(message, "Arabic Male", {
-    onend: function () {
-      speakMessagesSequentially(messages);
+    function newGame() {
+      players = [
+        { name: "", total: 0 },
+        { name: "", total: 0 },
+        { name: "", total: 0 },
+        { name: "", total: 0 }
+      ];
+      document.getElementById("name1").value = "";
+      document.getElementById("name2").value = "";
+      document.getElementById("name3").value = "";
+      document.getElementById("name4").value = "";
+      document.getElementById("rankingList").innerHTML = "";
+      document.getElementById("roundHistory").innerHTML = "";
+      document.getElementById("newGameBtn").style.display = "none";
     }
-  });
-}
-</script>
-
-</body>
+  </script>
+<p style="margin-top:40px; color:#888; font-size:14px;">جميع الحقوق محفوظة لحزب الكهف 2025</p>
 </html>
