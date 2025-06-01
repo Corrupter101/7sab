@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,31 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حساب التضمين</title>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
-  <script>
-    function resetAllScores() {
-      document.querySelectorAll('.player').forEach(player => {
-        player.querySelector('span').textContent = '0';
-        player.querySelector('input[type="number"]').value = '';
-      });
-    }
-  </script>
   <style>
     body {
       font-family: 'Tajawal', sans-serif;
-      margin: 0;
+      margin: 0 auto;
       padding: 0;
       background-color: black;
       color: white;
+      max-width: 500px;
+      zoom: 0.9;
     }
     .settings {
       position: fixed;
       top: 60px;
       right: 10px;
       background: #222;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #444;
       z-index: 999;
       display: none;
+      width: 260px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.2);
     }
     .player {
       background: #222;
@@ -81,10 +77,34 @@
 </div>
 
 <div id="playersContainer">
-  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
-  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
-  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
-  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
+  <div class="player">
+    <input type="text" placeholder="اسم اللاعب">
+    <input type="number" placeholder="النقاط">
+    <button onclick="adjustPoints(this, 1)">➕</button>
+    <button onclick="adjustPoints(this, -1)">➖</button>
+    <span>0</span>
+  </div>
+  <div class="player">
+    <input type="text" placeholder="اسم اللاعب">
+    <input type="number" placeholder="النقاط">
+    <button onclick="adjustPoints(this, 1)">➕</button>
+    <button onclick="adjustPoints(this, -1)">➖</button>
+    <span>0</span>
+  </div>
+  <div class="player">
+    <input type="text" placeholder="اسم اللاعب">
+    <input type="number" placeholder="النقاط">
+    <button onclick="adjustPoints(this, 1)">➕</button>
+    <button onclick="adjustPoints(this, -1)">➖</button>
+    <span>0</span>
+  </div>
+  <div class="player">
+    <input type="text" placeholder="اسم اللاعب">
+    <input type="number" placeholder="النقاط">
+    <button onclick="adjustPoints(this, 1)">➕</button>
+    <button onclick="adjustPoints(this, -1)">➖</button>
+    <span>0</span>
+  </div>
 </div>
 
 <div style="text-align:center; margin: 20px;">
@@ -115,11 +135,64 @@ function announceResults() {
   responsiveVoice.speak(texts.join('، '), 'Arabic Male');
 }
 
+function resetAllScores() {
+  document.querySelectorAll('.player').forEach(player => {
+    player.querySelector('span').textContent = '0';
+    player.querySelector('input[type="number"]').value = '';
+  });
+}
+
 function resetAllNames() {
   document.querySelectorAll('.player').forEach(player => {
     player.querySelector('input[type="text"]').value = '';
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.style.backgroundColor = '#000000';
+  document.body.style.color = '#ffffff';
+
+  document.getElementById('toggleSettings').addEventListener('click', () => {
+    const panel = document.getElementById('settingsPanel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  });
+
+  document.getElementById('cancelSettings').addEventListener('click', () => {
+    document.getElementById('settingsPanel').style.display = 'none';
+  });
+
+  document.getElementById('applySettings').addEventListener('click', () => {
+    localStorage.setItem('soundEnabled', document.getElementById('soundToggle').checked);
+    localStorage.setItem('darkModeEnabled', document.getElementById('darkModeToggle').checked);
+    localStorage.setItem('bgColor', document.getElementById('bgColorPicker').value);
+    localStorage.setItem('fontFamily', document.getElementById('fontSelector').value);
+    location.reload();
+  });
+
+  document.getElementById('resetSettings').addEventListener('click', () => {
+    localStorage.clear();
+    location.reload();
+  });
+
+  if (localStorage.getItem('soundEnabled')) {
+    const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
+    document.getElementById('soundToggle').checked = soundEnabled;
+  }
+  if (localStorage.getItem('darkModeEnabled')) {
+    const darkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
+    document.getElementById('darkModeToggle').checked = darkModeEnabled;
+    document.body.style.backgroundColor = darkModeEnabled ? 'black' : 'white';
+    document.body.style.color = darkModeEnabled ? 'white' : 'black';
+  }
+  if (localStorage.getItem('bgColor')) {
+    document.body.style.backgroundColor = localStorage.getItem('bgColor');
+    document.getElementById('bgColorPicker').value = localStorage.getItem('bgColor');
+  }
+  if (localStorage.getItem('fontFamily')) {
+    document.body.style.fontFamily = localStorage.getItem('fontFamily');
+    document.getElementById('fontSelector').value = localStorage.getItem('fontFamily');
+  }
+});
 </script>
 
 </body>
