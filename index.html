@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,104 +6,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حساب التضمين</title>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
+  <script>
+    function resetAllScores() {
+      document.querySelectorAll('.player').forEach(player => {
+        player.querySelector('span').textContent = '0';
+        player.querySelector('input[type="number"]').value = '';
+      });
+    }
+  </script>
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: #0b568f; color: white; text-align: center; direction: rtl; }
-    .container { height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 10px; box-sizing: border-box; }
-    h2 { margin: 10px 0; }
-    .player { display: flex; flex-direction: column; align-items: center; background: #1976d2; padding: 10px; border-radius: 8px; width: 100%; max-width: 360px; margin-bottom: 10px; }
-    .player-top { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; }
-    .player input[type="text"] { width: 60px; font-size: 16px; text-align: center; }
-    .player .point-input { width: 80px; font-size: 16px; margin-top: 5px; text-align: center; }
-    .player button { font-size: 18px; padding: 5px 10px; margin: 0 3px; }
-    .reset-btn, .announce-btn { margin-top: 10px; background: red; color: white; padding: 10px 20px; border: none; font-size: 16px; border-radius: 6px; }
-    .announce-btn { background: green; }
-    .name-input { width: 120px; font-size: 14px; text-align: center; margin-right: 5px; }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: white;
+    }
+    .settings {
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      z-index: 999;
+      display: none;
+    }
+    .player {
+      background: #222;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      margin: 5px;
+      width: 30%;
+    }
+    button {
+      padding: 8px 12px;
+      margin: 5px;
+    }
+    #toggleSettings {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      background: #555;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>قيد عام</h2>
-    <div id="players">
-      <div class="player" id="player0">
-        <div class="player-top">
-          <button onclick="applyPoints('player0', -1)">-</button>
-          <input type="text" class="score-display" value="0" readonly>
-          <button onclick="applyPoints('player0', 1)">+</button>
-          <input type="text" class="name-input" placeholder="اللاعب 1" onchange="updateName('player0', this.value)">
-        </div>
-        <input type="number" class="point-input" placeholder="أدخل النقاط">
-      </div>
-      <div class="player" id="player1">
-        <div class="player-top">
-          <button onclick="applyPoints('player1', -1)">-</button>
-          <input type="text" class="score-display" value="0" readonly>
-          <button onclick="applyPoints('player1', 1)">+</button>
-          <input type="text" class="name-input" placeholder="اللاعب 2" onchange="updateName('player1', this.value)">
-        </div>
-        <input type="number" class="point-input" placeholder="أدخل النقاط">
-      </div>
-      <div class="player" id="player2">
-        <div class="player-top">
-          <button onclick="applyPoints('player2', -1)">-</button>
-          <input type="text" class="score-display" value="0" readonly>
-          <button onclick="applyPoints('player2', 1)">+</button>
-          <input type="text" class="name-input" placeholder="اللاعب 3" onchange="updateName('player2', this.value)">
-        </div>
-        <input type="number" class="point-input" placeholder="أدخل النقاط">
-      </div>
-      <div class="player" id="player3">
-        <div class="player-top">
-          <button onclick="applyPoints('player3', -1)">-</button>
-          <input type="text" class="score-display" value="0" readonly>
-          <button onclick="applyPoints('player3', 1)">+</button>
-          <input type="text" class="name-input" placeholder="اللاعب 4" onchange="updateName('player3', this.value)">
-        </div>
-        <input type="number" class="point-input" placeholder="أدخل النقاط">
-      </div>
-    </div>
-    <button class="reset-btn" onclick="resetAll()">إعادة تعيين</button>
-    <button class="announce-btn" onclick="announceResults()">📢 نشر النتائج</button>
-  </div>
 
-  <script>
-    const playerData = {
-      player0: { name: '', score: 0 },
-      player1: { name: '', score: 0 },
-      player2: { name: '', score: 0 },
-      player3: { name: '', score: 0 },
-    };
+<button id="toggleSettings">⚙️</button>
+<div class="settings" id="settingsPanel">
+  <label><input type="checkbox" id="soundToggle" checked> تشغيل الصوت</label><br>
+  <label><input type="checkbox" id="darkModeToggle" checked> الوضع الداكن</label><br>
+  <label>لون الخلفية: <input type="color" id="bgColorPicker" value="#000000"></label><br>
+  <label>اختيار الخط:
+    <select id="fontSelector">
+      <option value="Tajawal" selected>Tajawal</option>
+      <option value="Arial">Arial</option>
+      <option value="Cairo">Cairo</option>
+      <option value="Amiri">Amiri</option>
+    </select>
+  </label><br>
+  <button id="resetSettings">🔄 استعادة الإعدادات الافتراضية</button>
+  <button id="applySettings">✅ تطبيق</button>
+  <button id="cancelSettings">❌ إلغاء</button>
+</div>
 
-    function applyPoints(id, sign) {
-      const playerEl = document.getElementById(id);
-      const inputEl = playerEl.querySelector(".point-input");
-      const displayEl = playerEl.querySelector(".score-display");
-      const value = parseInt(inputEl.value) || 0;
-      playerData[id].score += sign * value;
-      displayEl.value = playerData[id].score;
-      inputEl.value = "";
-    }
+<div id="playersContainer">
+  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
+  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
+  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
+  <div class="player"><input type="text" placeholder="اسم اللاعب"><input type="number" placeholder="النقاط"><button onclick="adjustPoints(this, 1)">➕</button><button onclick="adjustPoints(this, -1)">➖</button><span>0</span></div>
+</div>
 
-    function updateName(id, name) {
-      playerData[id].name = name;
-    }
+<div style="text-align:center; margin: 20px;">
+  <button onclick="announceResults()">📢 نشر النتائج</button>
+  <button onclick="resetAllScores()">🔁 إعادة تعيين النقاط</button>
+  <button onclick="resetAllNames()">🔄 إعادة تعيين الأسماء</button>
+</div>
 
-    function resetAll() {
-      for (const id in playerData) {
-        playerData[id].score = 0;
-        const playerEl = document.getElementById(id);
-        const displayEl = playerEl.querySelector(".score-display");
-        displayEl.value = 0;
-      }
-    }
+<script>
+function adjustPoints(btn, direction) {
+  const playerDiv = btn.closest('.player');
+  const input = playerDiv.querySelector('input[type="number"]');
+  const span = playerDiv.querySelector('span');
+  let current = parseInt(span.textContent) || 0;
+  let change = parseInt(input.value) || 0;
+  current += direction * change;
+  span.textContent = `${current}`;
+  input.value = '';
+}
 
-    function announceResults() {
-      const results = Object.entries(playerData).map(([id, data]) => {
-        const name = data.name.trim() || id;
-        return `${name} لديه ${data.score} بنط`;
-      });
-      const message = results.join("، ");
-      responsiveVoice.speak(message, "Arabic Male");
-    }
-  </script>
+function announceResults() {
+  let texts = [];
+  document.querySelectorAll('.player').forEach(player => {
+    const name = player.querySelector('input[type="text"]').value || 'لاعب';
+    const score = player.querySelector('span').textContent;
+    texts.push(`${name} لديه ${score}`);
+  });
+  responsiveVoice.speak(texts.join('، '), 'Arabic Male');
+}
+
+function resetAllNames() {
+  document.querySelectorAll('.player').forEach(player => {
+    player.querySelector('input[type="text"]').value = '';
+  });
+}
+</script>
+
 </body>
 </html>
