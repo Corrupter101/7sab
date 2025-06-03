@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حساب التضمين</title>
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>حساب التضمين</title>
+<!-- تضمين مكتبة ResponsiveVoice أولاً -->
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=WIZiyVE9"></script>
+<style>
     body {
       font-family: 'Tajawal', sans-serif;
       margin: 0 auto;
@@ -15,185 +17,388 @@
       max-width: 500px;
       zoom: 0.9;
     }
-    .settings {
-      position: fixed;
-      top: 60px;
-      right: 10px;
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid #444;
-      z-index: 999;
-      display: none;
-      width: 260px;
-      box-shadow: 0 0 12px rgba(255,255,255,0.2);
-    }
     .player {
-      background: #222;
-      padding: 15px;
+      background-color: #222;
+      padding: 10px;
       margin: 10px;
       border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    input[type="text"], input[type="number"] {
+    .player input[type="text"], .player input[type="number"] {
       padding: 8px;
       margin: 5px;
-      width: 30%;
     }
+    .player input[type="text"] { width: 25%; }
+    .player input[type="number"] { width: 15%; }
+    .player button { width: 15%; font-size: 18px; }
+    .player .total { width: 20%; text-align: center; font-weight: bold; color: #FFD700; }
     button {
       padding: 8px 12px;
       margin: 5px;
+      border-radius: 10px;
+      font-size: 16px;
     }
-    #toggleSettings {
+    #announceBtn {
+      background-color: #28a745;
+      font-size: 18px;
+      font-weight: bold;
+      width: 90%;
+      display: block;
+      margin: 15px auto;
+    }
+    #roundRecords {
+      background-color: #111;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+      border: 1px solid #333;
+    }
+    #roundRecords ul {
+      padding: 0;
+      list-style: none;
+    }
+    #roundRecords li {
+      padding: 5px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+    }
+    #controls {
+      text-align: center;
+      margin-top: 10px;
+    }
+    /* تنسيقات النافذة المنبثقة لنهاية اللعبة */
+    #gameEndModal, #settingsModal, #settingsModalOverlay {
+      display: none;
+    }
+    #gameEndModal {
       position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1001;
-      background: #555;
-      color: white;
+      z-index: 1000;
+      padding: 30px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      font-family: 'Tajawal', sans-serif;
+      color: #000;
+    }
+    #gameEndModal h2 {
+      margin-top: 0;
+      color: #2e8b57;
+      font-size: 22px;
+    }
+    #gameEndModal p { margin: 5px 0; font-size: 18px; }
+    #gameEndModal button {
+      margin: 10px;
+      padding: 10px 20px;
       border: none;
-      padding: 8px 12px;
+      background-color: #2e8b57;
+      color: white;
+      font-size: 16px;
       border-radius: 8px;
+      cursor: pointer;
+    }
+    #gameEndModal button:hover { background-color: #1f5f3d; }
+
+    /* نافذة الإعدادات */
+    #settingsModalOverlay {
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    #settingsModal {
+      position: fixed;
+      z-index: 1000;
+      padding: 20px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      color: #000;
+      min-width: 300px;
+      font-family: 'Tajawal', sans-serif;
+    }
+    #settingsModal h3 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #2e8b57;
     }
   </style>
 </head>
-<body>
-
-<button id="toggleSettings">⚙️</button>
-<div class="settings" id="settingsPanel">
-  <label><input type="checkbox" id="soundToggle" checked> تشغيل الصوت</label><br>
-  <label><input type="checkbox" id="darkModeToggle" checked> الوضع الداكن</label><br>
-  <label>لون الخلفية: <input type="color" id="bgColorPicker" value="#000000"></label><br>
-  <label>اختيار الخط:
-    <select id="fontSelector">
-      <option value="Tajawal" selected>Tajawal</option>
-      <option value="Arial">Arial</option>
-      <option value="Cairo">Cairo</option>
-      <option value="Amiri">Amiri</option>
-    </select>
-  </label><br>
-  <button id="resetSettings">🔄 استعادة الإعدادات الافتراضية</button>
-  <button id="applySettings">✅ تطبيق</button>
-  <button id="cancelSettings">❌ إلغاء</button>
+<body><h1 style="text-align: center; margin-top: 10px; color: #FFD700;">قيد السبيته</h1>
+<!-- صوت التنبيه -->
+<audio id="notifySound" preload="auto" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<!-- مربعات اللاعبين -->
+<div class="player">
+<input placeholder="اسم اللاعب" type="text"/>
+<input class="points" placeholder="" type="number" value=""/>
+<button onclick="adjustPoints(this, 'subtract')">➖</button>
+<button onclick="adjustPoints(this, 'add')">➕</button>
+<div class="total">0</div>
 </div>
-
-<div id="playersContainer">
-  <div class="player">
-    <input type="text" placeholder="اسم اللاعب">
-    <input type="number" placeholder="النقاط">
-    <button onclick="adjustPoints(this, 1)">➕</button>
-    <button onclick="adjustPoints(this, -1)">➖</button>
-    <span>0</span>
-  </div>
-  <div class="player">
-    <input type="text" placeholder="اسم اللاعب">
-    <input type="number" placeholder="النقاط">
-    <button onclick="adjustPoints(this, 1)">➕</button>
-    <button onclick="adjustPoints(this, -1)">➖</button>
-    <span>0</span>
-  </div>
-  <div class="player">
-    <input type="text" placeholder="اسم اللاعب">
-    <input type="number" placeholder="النقاط">
-    <button onclick="adjustPoints(this, 1)">➕</button>
-    <button onclick="adjustPoints(this, -1)">➖</button>
-    <span>0</span>
-  </div>
-  <div class="player">
-    <input type="text" placeholder="اسم اللاعب">
-    <input type="number" placeholder="النقاط">
-    <button onclick="adjustPoints(this, 1)">➕</button>
-    <button onclick="adjustPoints(this, -1)">➖</button>
-    <span>0</span>
-  </div>
+<div class="player">
+<input placeholder="اسم اللاعب" type="text"/>
+<input class="points" placeholder="" type="number" value=""/>
+<button onclick="adjustPoints(this, 'subtract')">➖</button>
+<button onclick="adjustPoints(this, 'add')">➕</button>
+<div class="total">0</div>
 </div>
-
-<div style="text-align:center; margin: 20px;">
-  <button onclick="announceResults()">📢 نشر النتائج</button>
-  <button onclick="resetAllScores()">🔁 إعادة تعيين النقاط</button>
-  <button onclick="resetAllNames()">🔄 إعادة تعيين الأسماء</button>
+<div class="player">
+<input placeholder="اسم اللاعب" type="text"/>
+<input class="points" placeholder="" type="number" value=""/>
+<button onclick="adjustPoints(this, 'subtract')">➖</button>
+<button onclick="adjustPoints(this, 'add')">➕</button>
+<div class="total">0</div>
 </div>
-
+<div class="player">
+<input placeholder="اسم اللاعب" type="text"/>
+<input class="points" placeholder="" type="number" value=""/>
+<button onclick="adjustPoints(this, 'subtract')">➖</button>
+<button onclick="adjustPoints(this, 'add')">➕</button>
+<div class="total">0</div>
+</div>
+<!-- أزرار التحكم الرئيسية -->
+<div id="controls">
+<button id="announceBtn" onclick="announceResults()">📢 نشر النتائج</button>
+<button onclick="confirmNewGame()">🎮 دور جديد</button>
+<button onclick="confirmClearRecords()">🗑️ مسح السجلات</button>
+<button id="settingsBtn">⚙️ الإعدادات</button>
+</div>
+<!-- سجل الجولات -->
+<div id="roundRecords">
+<h3>سجل الجولات</h3>
+<ul id="recordsList"></ul>
+</div>
+<!-- نافذة نهاية اللعبة -->
+<div id="gameEndModal">
+<h2>انتهت اللعبة</h2>
+<p id="winnerText"></p>
+<p id="loserText"></p>
+<button onclick="restartSamePlayers()">بدء دور جديد بنفس اللاعبين</button>
+<button onclick="restartWithNewPlayers()">اختيار لاعبين جدد</button>
+</div>
+<!-- نافذة الإعدادات -->
+<div id="settingsModalOverlay"></div>
+<div id="settingsModal">
+<h3>الإعدادات</h3>
+<label>
+<input checked="" id="toggleSound" type="checkbox"/> تمكين الصوت
+    </label><br/><br/>
+<label>اختر الصوت:
+      <select id="voiceSelect">
+<option value="Arabic Male">Arabic Male</option>
+<option value="Arabic Female">Arabic Female</option>
+</select>
+</label><br/><br/>
+<label>السمة:
+      <select id="themeSelect">
+<option value="dark">داكن</option>
+<option value="light">فاتح</option>
+</select>
+</label><br/><br/>
+<button onclick="saveSettings()">حفظ</button>
+<button onclick="closeSettings()">إلغاء</button>
+</div>
 <script>
-function adjustPoints(btn, direction) {
-  const playerDiv = btn.closest('.player');
-  const input = playerDiv.querySelector('input[type="number"]');
-  const span = playerDiv.querySelector('span');
-  let current = parseInt(span.textContent) || 0;
-  let change = parseInt(input.value) || 0;
-  current += direction * change;
-  span.textContent = `${current}`;
-  input.value = '';
-}
+    let roundNumber = 1;
+    let lastTotals = [0, 0, 0, 0];
+    let soundEnabled = true;
+    let selectedVoice = 'Arabic Male';
+    let theme = 'dark';
 
-function announceResults() {
-  let texts = [];
-  document.querySelectorAll('.player').forEach(player => {
-    const name = player.querySelector('input[type="text"]').value || 'لاعب';
-    const score = player.querySelector('span').textContent;
-    texts.push(`${name} لديه ${score}`);
-  });
-  responsiveVoice.speak(texts.join('، '), 'Arabic Male');
-}
+    function applyTheme() {
+      if (theme === 'light') {
+        document.body.style.backgroundColor = '#fff';
+        document.body.style.color = '#000';
+        document.querySelectorAll('.player').forEach(el => {
+          el.style.backgroundColor = '#eee';
+          el.style.color = '#000';
+        });
+        document.getElementById('announceBtn').style.backgroundColor = '#4CAF50';
+      } else {
+        document.body.style.backgroundColor = 'black';
+        document.body.style.color = 'white';
+        document.querySelectorAll('.player').forEach(el => {
+          el.style.backgroundColor = '#222';
+          el.style.color = 'white';
+        });
+        document.getElementById('announceBtn').style.backgroundColor = '#28a745';
+      }
+    }
 
-function resetAllScores() {
-  document.querySelectorAll('.player').forEach(player => {
-    player.querySelector('span').textContent = '0';
-    player.querySelector('input[type="number"]').value = '';
-  });
-}
+    function speakText(text) {
+      if (soundEnabled) {
+        responsiveVoice.speak(text, selectedVoice);
+      }
+    }
 
-function resetAllNames() {
-  document.querySelectorAll('.player').forEach(player => {
-    player.querySelector('input[type="text"]').value = '';
-  });
-}
+    function playNotifySound() {
+      if (soundEnabled) {
+        document.getElementById('notifySound').play();
+      }
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.body.style.backgroundColor = '#000000';
-  document.body.style.color = '#ffffff';
+    function addSukoonToLastLetter(word) {
+      return word.replace(/(.)$/, '$1ْ');
+    }
 
-  document.getElementById('toggleSettings').addEventListener('click', () => {
-    const panel = document.getElementById('settingsPanel');
-    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
-  });
+    function adjustPoints(button, action) {
+      const container = button.closest('.player');
+      const input = container.querySelector('.points');
+      const totalDiv = container.querySelector('.total');
 
-  document.getElementById('cancelSettings').addEventListener('click', () => {
-    document.getElementById('settingsPanel').style.display = 'none';
-  });
+      const value = parseInt(input.value || 0);
+      let total = parseInt(totalDiv.textContent || 0);
 
-  document.getElementById('applySettings').addEventListener('click', () => {
-    localStorage.setItem('soundEnabled', document.getElementById('soundToggle').checked);
-    localStorage.setItem('darkModeEnabled', document.getElementById('darkModeToggle').checked);
-    localStorage.setItem('bgColor', document.getElementById('bgColorPicker').value);
-    localStorage.setItem('fontFamily', document.getElementById('fontSelector').value);
-    location.reload();
-  });
+      if (!isNaN(value)) {
+        if (action === 'add') {
+          total += value;
+        } else if (action === 'subtract') {
+          total -= value;
+        }
+        totalDiv.textContent = total;
+        input.value = '';
+      }
+    }
 
-  document.getElementById('resetSettings').addEventListener('click', () => {
-    localStorage.clear();
-    location.reload();
-  });
+    function announceResults() {
+      const players = document.querySelectorAll('.player');
+      const currentTotals = [];
+      let totalsChanged = false;
 
-  if (localStorage.getItem('soundEnabled')) {
-    const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
-    document.getElementById('soundToggle').checked = soundEnabled;
-  }
-  if (localStorage.getItem('darkModeEnabled')) {
-    const darkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
-    document.getElementById('darkModeToggle').checked = darkModeEnabled;
-    document.body.style.backgroundColor = darkModeEnabled ? 'black' : 'white';
-    document.body.style.color = darkModeEnabled ? 'white' : 'black';
-  }
-  if (localStorage.getItem('bgColor')) {
-    document.body.style.backgroundColor = localStorage.getItem('bgColor');
-    document.getElementById('bgColorPicker').value = localStorage.getItem('bgColor');
-  }
-  if (localStorage.getItem('fontFamily')) {
-    document.body.style.fontFamily = localStorage.getItem('fontFamily');
-    document.getElementById('fontSelector').value = localStorage.getItem('fontFamily');
-  }
-});
-</script>
+      const results = [];
+      players.forEach((player, index) => {
+        const name = player.querySelector('input[type="text"]').value || 'لاعب';
+        const total = parseInt(player.querySelector('.total').textContent || 0);
+        currentTotals[index] = total;
+        if (total !== lastTotals[index]) {
+          totalsChanged = true;
+        }
+        results.push(`${name} ${total}`);
+      });
 
+      if (totalsChanged) {
+        const record = document.createElement('li');
+        record.textContent = `الجولة ${roundNumber}: ` + results.join(' | ');
+        document.getElementById('recordsList').appendChild(record);
+        roundNumber++;
+        lastTotals = currentTotals;
+      }
+
+      let winner = '';
+      let loser = '';
+      let minPoints = Infinity;
+      let maxPoints = -Infinity;
+
+      players.forEach((player) => {
+        const name = player.querySelector('input[type="text"]').value || 'لاعب';
+        const total = parseInt(player.querySelector('.total').textContent || 0);
+        if (total < minPoints) {
+          minPoints = total;
+          winner = name;
+        }
+        if (total > maxPoints) {
+          maxPoints = total;
+          loser = name;
+        }
+      });
+
+      const khabsahLine =
+        maxPoints >= 159
+          ? 'فارت في وجه ' + addSukoonToLastLetter(loser)
+          : 'الخَبْصَة عند ' + addSukoonToLastLetter(loser);
+
+      const spokenResults = [];
+      players.forEach((player) => {
+        const name = player.querySelector('input[type="text"]').value || 'لاعب';
+        const total = parseInt(player.querySelector('.total').textContent || 0);
+        spokenResults.push(`${addSukoonToLastLetter(name)} ${total}`);
+      });
+
+      speakText(spokenResults.join('. ') + '. ' + khabsahLine);
+
+      responsiveVoice.onend = function () {
+        if (maxPoints >= 159) {
+          const winnerText = document.getElementById('winnerText');
+          const loserText = document.getElementById('loserText');
+          const modal = document.getElementById('gameEndModal');
+          const overlay = document.getElementById('settingsModalOverlay');
+
+          winnerText.textContent = `الفائز: ${winner} (${minPoints})`;
+          loserText.textContent = `الخاسر: ${loser} (${maxPoints})`;
+          modal.style.display = 'block';
+          overlay.style.display = 'none';
+          playNotifySound();
+        }
+        responsiveVoice.onend = null;
+      };
+    }
+
+    function clearRecords() {
+      document.getElementById('recordsList').innerHTML = '';
+      document.querySelectorAll('.total').forEach((div) => (div.textContent = 0));
+      lastTotals = [0, 0, 0, 0];
+      roundNumber = 1;
+    }
+
+    function confirmClearRecords() {
+      if (confirm('هل أنت متأكد من مسح كل السجلات؟')) clearRecords();
+    }
+
+    function restartSamePlayers() {
+      document.querySelectorAll('.total').forEach((div) => (div.textContent = 0));
+      document.querySelectorAll('.points').forEach((input) => (input.value = ''));
+      lastTotals = [0, 0, 0, 0];
+      roundNumber = 1;
+      document.getElementById('gameEndModal').style.display = 'none';
+    }
+
+    function restartWithNewPlayers() {
+      document.querySelectorAll('.total').forEach((div) => (div.textContent = 0));
+      document.querySelectorAll('.points').forEach((input) => (input.value = ''));
+      document.querySelectorAll('input[type="text"]').forEach((input) => (input.value = ''));
+      lastTotals = [0, 0, 0, 0];
+      roundNumber = 1;
+      document.getElementById('gameEndModal').style.display = 'none';
+    }
+
+    function confirmNewGame() {
+      if (confirm('هل ترغب في بدء دور جديد بنفس اللاعبين؟')) {
+        restartSamePlayers();
+      } else if (confirm('هل ترغب في اختيار لاعبين جدد؟')) {
+        restartWithNewPlayers();
+      }
+    }
+
+    // إعداد الإعدادات
+    document.getElementById('settingsBtn').addEventListener('click', function() {
+      document.getElementById('settingsModalOverlay').style.display = 'block';
+      document.getElementById('settingsModal').style.display = 'block';
+    });
+
+    function closeSettings() {
+      document.getElementById('settingsModalOverlay').style.display = 'none';
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function saveSettings() {
+      soundEnabled = document.getElementById('toggleSound').checked;
+      selectedVoice = document.getElementById('voiceSelect').value;
+      theme = document.getElementById('themeSelect').value;
+      applyTheme();
+      closeSettings();
+    }
+
+    applyTheme();
+  </script>
 </body>
 </html>
